@@ -1,0 +1,21 @@
+# Environment Config
+
+# store your secrets and config variables in here
+# only invited collaborators will be able to see your .env values
+
+# reference these in your code with process.env.SECRET
+
+SECRET=
+MADE_WITH=
+
+SLACK_SIGNING_SECRET=
+
+SLACK_BOT_TOKEN=
+
+BOT_ID=
+
+JIRA_USERNAME=
+
+JIRA_PASSWORD=
+
+# note: .env is a shell file so there can't be spaces around =
