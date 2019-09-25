@@ -22,6 +22,7 @@ let description = "";
 let elementsWithIssueLoc = [];
 let elementsWithCommentLoc = [];
 let elementsUpdateMessage = [];
+
 const pattAppMentionGreetingGerman = /^(hallo|servus|grüß gott|grüezi|moin|guten tag|guten morgen|guten abend|tach|na)(?:$|\s+.*)/i;
 const pattAppMentionGreetingEnglish = /^(hi|hey|hello|good evening|good morning|good afternoon|what's up|sup|whazzup|what's going on|yo|howdy|hiya)(?:$|\s+.*)/i;
 const pattMessageWithDecisionKnowledge = /.*:(decision|issue|pro|con|alternative):.*/;
