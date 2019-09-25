@@ -399,7 +399,7 @@ async function descriptionMissing(app, botToken, channel, user, knowledgetype) {
   return result;
 }
 
-async function memberJoinChannelMessage(app, botToken, channel, user, botUserID) {
+async function memberJoinChannelMessage(app, botToken, user, channel, botUserID) {
   const result = await app.client.chat.postEphemeral({
     token: botToken,
     channel: channel,
@@ -409,7 +409,7 @@ async function memberJoinChannelMessage(app, botToken, channel, user, botUserID)
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `Hello <@${event.user}>! My name is DecBot and I want to make life easier for you :smiley:.`
+          text: `Hello <@${user}>! My name is DecBot and I want to make life easier for you :smiley:.`
         }
       },
       {
@@ -417,7 +417,7 @@ async function memberJoinChannelMessage(app, botToken, channel, user, botUserID)
 
         text: {
           type: "mrkdwn",
-          text: `If you want to find out more about my skills, just type in  "<@${botUserID}> help". :nerd:`
+          text: `If you want to find out more about my skills, just type in: "<@${botUserID}> help".`
         }
       }
     ]
@@ -824,7 +824,7 @@ async function sendErrorToUser(app, context, channel, user, knowledgeElement) {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `<@${user}> Dein Entscheidungswissen (:${knowledgeElement.elementType}: ${knowledgeElement.elementText}) konnte leider nicht nach Jira exportiert werden. :disappointed: \n Überprüfe deine Angaben, versuche es später nochmal oder frage den Admin.`
+          text: `<@${user}> Dein Entscheidungswissen (:${knowledgeElement.elementType}: ${knowledgeElement.elementText}) konnte leider nicht nach Jira exportiert werden. :disappointed: \n Überprüfe deine Angaben und die Erreichbarkeit des Jira-Servers. \n Versuche es später nochmal oder frage den Admin.`
         }
       }
     ]
