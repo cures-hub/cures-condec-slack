@@ -2,8 +2,6 @@
 
 require("dotenv").config();
 
-const button_event_listener = require("./button-eventlistener");
-
 const jira_rest_handler = require("./jira-rest-handler");
 
 const reaction_event_listener = require("./reaction-eventlistener");
@@ -29,8 +27,6 @@ let jiraServerURL = "https://cures.ifi.uni-heidelberg.de/jira";
 const pattAppMentionGreetingGerman = /^(hallo|servus|grüß gott|grüezi|moin|guten tag|guten morgen|guten abend|tach|na)(?:$|\s+.*)/i;
 const pattAppMentionGreetingEnglish = /^(hi|hey|hello|good evening|good morning|good afternoon|what's up|sup|whazzup|what's going on|yo|howdy|hiya)(?:$|\s+.*)/i;
 const pattMessageWithDecisionKnowledge = /.*:(decision|issue|pro|con|alternative):.*/;
-const testingAppChannelID = process.env.CHANNEL_ID;
-const slackUserToken = process.env.SLACK_USER_TOKEN;
 const botUserToken = process.env.SLACK_BOT_TOKEN;
 let jiraIssueURL;
 let messageTS;
@@ -47,6 +43,7 @@ const app = new App({
   console.log("⚡️ Slack-Jira app is running!");
 })();
 
+//can be used to delete old messages in a channel
 async function getChannelHistory(userToken, botToken, channel, count) {
   let history = await app.client.channels.history({
     token: userToken,
@@ -61,13 +58,12 @@ async function getChannelHistory(userToken, botToken, channel, count) {
 
 //Bot begrüßt ein neues Mitglied, wenn es dem Channel beitritt.
 app.event("member_joined_channel", async ({ event, context }) => {
-  console.log(context.botUserId);
   const result = await post_bot_messages.memberJoinChannelMessage(
     app,
     context.botToken,
-    event.user, 
-    testingAppChannelID,
-    context.botUserId 
+    event.user,
+    event.channel,
+    context.botUserId
   );
   return result;
 });
@@ -75,7 +71,6 @@ app.event("member_joined_channel", async ({ event, context }) => {
 //listener für nachrichten in denen der Bot erwähnt wird
 app.event("app_mention", async ({ event, context }) => {
   let botUserID = context.botUserId;
-  console.log(botUserID);
 
   let messageText = event.text.substring(12).trim();
   console.log(`messageText: ${messageText}`);
@@ -107,7 +102,7 @@ app.event("app_mention", async ({ event, context }) => {
     const result = await post_bot_messages.greetUserEnglish(
       app,
       context.botToken,
-      testingAppChannelID,
+      event.channel,
       event.user,
       greeting,
       botUserID
@@ -128,7 +123,7 @@ app.event("app_mention", async ({ event, context }) => {
     const result = await post_bot_messages.greetUserGerman(
       app,
       context.botToken,
-      testingAppChannelID,
+      event.channel,
       event.user,
       greeting,
       botUserID
@@ -138,7 +133,7 @@ app.event("app_mention", async ({ event, context }) => {
     const result = await post_bot_messages.helpMessageEnglish(
       app,
       context.botToken,
-      testingAppChannelID,
+      event.channel,
       event.user
     );
     return result;
@@ -146,7 +141,7 @@ app.event("app_mention", async ({ event, context }) => {
     const result = await post_bot_messages.helpMessageGerman(
       app,
       context.botToken,
-      testingAppChannelID,
+      event.channel,
       event.user
     );
     return result;
@@ -154,8 +149,8 @@ app.event("app_mention", async ({ event, context }) => {
     const result = await post_bot_messages.botMentionGeneralMessage(
       app,
       context.botToken,
-      testingAppChannelID,
-      event.user, 
+      event.channel,
+      event.user,
       botUserID
     );
     return result;
@@ -164,64 +159,68 @@ app.event("app_mention", async ({ event, context }) => {
 
 app.action("export_help_click_english", async ({ body, ack, context }) => {
   ack();
-
   await post_bot_messages.exportHelpMessageEnglish(
     app,
     context.botToken,
-    testingAppChannelID,
+    body.channel.id,
     body.user.id
   );
 });
 
 app.action("export_help_click_german", async ({ body, ack, context }) => {
   ack();
-
   await post_bot_messages.exportHelpMessageGerman(
     app,
     context.botToken,
-    testingAppChannelID,
+    body.channel.id,
     body.user.id
   );
 });
 
 app.action("import_help_click_english", async ({ body, ack, context }) => {
   ack();
-
   await post_bot_messages.importHelpMessageEnglish(
     app,
     context.botToken,
-    testingAppChannelID,
+    body.channel.id,
     body.user.id
   );
 });
 
 app.action("import_help_click_german", async ({ body, ack, context }) => {
   ack();
-
   await post_bot_messages.importHelpMessageGerman(
     app,
     context.botToken,
-    testingAppChannelID,
+    body.channel.id,
     body.user.id
   );
 });
 
 //handler für Nachrichten in denen Entscheidungswissen gefunden wurde
-async function decisionKnowledgeMessageHandler(text, match, botToken, user) {
+async function decisionKnowledgeMessageHandler(
+  text,
+  match,
+  botToken,
+  user,
+  channel
+) {
   knowledgeElements = await message_listener.messageWithDecisionKnowledge(
     text,
     match,
     botToken,
     app,
-    testingAppChannelID,
+    channel,
     user
   );
   allElements.push(...knowledgeElements);
-  if (knowledgeElements[0].elementMessageType === 2) {
-    elementsFromMultMessage.push(knowledgeElements);
+  if (knowledgeElements.length > 0) {
+    if (knowledgeElements[0].elementMessageType === 2) {
+      elementsFromMultMessage.push(knowledgeElements);
+    }
   }
-  console.log(`Mult-Message-Elemente: ${elementsFromMultMessage.length}`);  
-  console.log("Alle Elemente aktualisiert:");  
+  console.log(`Mult-Message-Elemente: ${elementsFromMultMessage.length}`);
+  console.log("Alle Elemente aktualisiert:");
   allElements.forEach(element => {
     console.log(element);
   });
@@ -233,7 +232,8 @@ app.message(pattMessageWithDecisionKnowledge, async ({ message, context }) => {
     context.matches[0],
     context.matches[1],
     context.botToken,
-    message.user
+    message.user,
+    message.channel
   );
 });
 
@@ -257,7 +257,7 @@ app.event("reaction_added", async ({ event, context }) => {
   knowledgeElements = await reaction_event_listener.decisionKnowledgeReactionAdded(
     event,
     context,
-    testingAppChannelID,
+    event.item.channel,
     app
   );
   allElements.push(...knowledgeElements);
@@ -343,7 +343,7 @@ app.action(
             app,
             body.user.name,
             context,
-            testingAppChannelID,
+            body.channel.id,
             currentElement.elementType,
             currentElement.elementText,
             jiraIssueURL,
@@ -355,7 +355,7 @@ app.action(
             body.user.name,
             action.user,
             context.botToken,
-            testingAppChannelID,
+            body.channel.id,
             currentElement.elementType,
             currentElement.elementText,
             jiraIssueURL
@@ -377,7 +377,7 @@ app.action(
               app,
               body.user.id,
               context,
-              testingAppChannelID,
+              body.channel.id,
               currentElement.elementTS,
               elementsUpdateMessage
             );
@@ -395,7 +395,7 @@ app.action(
           } else {
             app.client.chat.delete({
               token: context.botToken,
-              channel: testingAppChannelID,
+              channel: body.channel.id,
               ts: currentElement.elementTS
             });
           }
@@ -408,10 +408,10 @@ app.action(
       }
     } catch (error) {
       console.error(error);
-      const result = await post_bot_messages.sendErrorToUser(
+      await post_bot_messages.sendErrorToUser(
         app,
         context,
-        testingAppChannelID,
+        body.channel.id,
         body.user.id,
         error.knowledgeElement
       );
@@ -463,15 +463,16 @@ app.action(
       console.log(`Erhaltener Project-Key: ${projectKey}`);
       jiraServerURL = action.submission.jira_server.trim();
       console.log(`Erhaltener Server-URL: ${jiraServerURL}`);
-      if ((numOfElementsWithIssueLoc) > 0) {
+      if (numOfElementsWithIssueLoc > 0) {
         await sendIssueRequests(
           userName,
           body.user.id,
-          elementsWithIssueLoc,          
+          elementsWithIssueLoc,
           projectKey,
           keyOfExistingJiraIssue,
           action,
-          context
+          context,
+          body.channel.id
         );
 
         if (elementsWithCommentLoc.length > 0) {
@@ -479,11 +480,12 @@ app.action(
             userName,
             body.user.id,
             elementsWithCommentLoc,
-            elementsWithIssueLoc,          
+            elementsWithIssueLoc,
             projectKey,
             keyOfExistingJiraIssue,
             action,
-            context
+            context,
+            body.channel.id
           );
         }
         if (numOfElementsWithIssueLoc > 1) {
@@ -505,7 +507,6 @@ app.action(
         }
       } else {
         for (const commentElement of elementsWithCommentLoc) {
-        
           try {
             messageTS = commentElement.elementTS;
             description = `${commentElement.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
@@ -513,7 +514,7 @@ app.action(
               commentElement.elementID
             ].trim();
             console.log(`Erhaltener Issue-Key: ${keyOfExistingJiraIssue}`);
-            
+
             let jiraIssueData = await jira_rest_handler.sendCreateIssueRequest(
               projectKey,
               commentElement.elementText,
@@ -523,7 +524,7 @@ app.action(
               process.env.JIRA_USERNAME,
               process.env.JIRA_PASSWORD,
               jiraServerURL,
-              keyOfExistingJiraIssue
+              keyOfExistingJiraIssue              
             );
             jiraIssueURL = jiraIssueData.url;
             console.log(`Returned URL Comment: ${jiraIssueURL}`);
@@ -543,7 +544,7 @@ app.action(
                 body.user.name,
                 action.user,
                 context.botToken,
-                testingAppChannelID,
+                body.channel.id,
                 commentElement.elementType,
                 commentElement.elementText,
                 jiraIssueURL
@@ -553,14 +554,16 @@ app.action(
                   knowledgeElement[0].elementTS === commentElement.elementTS
                 ) {
                   knowledgeElement.forEach((elementFromMessage, index2) => {
-                    if (commentElement.elementID === elementFromMessage.elementID) {
+                    if (
+                      commentElement.elementID === elementFromMessage.elementID
+                    ) {
                       knowledgeElement.splice(index2, 1);
                     }
                   });
                 }
-                if (knowledgeElement.length === 0){
+                if (knowledgeElement.length === 0) {
                   elementsFromMultMessage.splice(index1, 1);
-                } 
+                }
               });
             } else {
               throw new UploadToJiraFailedException(
@@ -573,7 +576,7 @@ app.action(
             await post_bot_messages.sendErrorToUser(
               app,
               context,
-              testingAppChannelID,
+              body.channel.id,
               body.user.id,
               error.knowledgeElement
             );
@@ -590,7 +593,7 @@ app.action(
           app,
           body.user.id,
           context,
-          testingAppChannelID,
+          body.channel.id,
           messageTS,
           elementsUpdateMessage
         );
@@ -603,7 +606,7 @@ app.action(
       } else if (elementsUpdateMessage.length === 0) {
         app.client.chat.delete({
           token: context.botToken,
-          channel: testingAppChannelID,
+          channel: body.channel.id,
           ts: messageTS
         });
       }
@@ -612,7 +615,7 @@ app.action(
       await post_bot_messages.sendErrorToUser(
         app,
         context,
-        testingAppChannelID,
+        body.channel.id,
         body.user.id,
         error.knowledgeElement
       );
@@ -624,17 +627,20 @@ app.action(
 async function sendIssueRequests(
   userName,
   userID,
-  elementList,  
+  elementList,
   projectKey,
   issueKey,
   action,
-  context
+  context, 
+  channel
 ) {
   for (const element of elementList) {
     try {
       messageTS = element.elementTS;
       description = `${element.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
-
+      console.log('Issue-Key vor sendCreateIssueRequest:');
+      console.log(issueKey);
+      
       let jiraIssueData = await jira_rest_handler.sendCreateIssueRequest(
         projectKey,
         element.elementText,
@@ -669,13 +675,13 @@ async function sendIssueRequests(
           userName,
           action.user,
           context.botToken,
-          testingAppChannelID,
+          channel,
           element.elementType,
           element.elementText,
           jiraIssueURL
         );
         console.log(`Anzahl Mult-Elemente: ${elementsFromMultMessage.length}`);
-        
+
         elementsFromMultMessage.forEach((knowledgeElement, index1) => {
           if (knowledgeElement[0].elementTS === element.elementTS) {
             knowledgeElement.forEach((elementFromMessage, index2) => {
@@ -684,7 +690,7 @@ async function sendIssueRequests(
               }
             });
           }
-          if (knowledgeElement.length === 0){
+          if (knowledgeElement.length === 0) {
             elementsFromMultMessage.splice(index1, 1);
           }
         });
@@ -696,9 +702,9 @@ async function sendIssueRequests(
       await post_bot_messages.sendErrorToUser(
         app,
         context,
-        testingAppChannelID,
+        channel,
         userID,
-        error.element
+        error.knowledgeElement
       );
       console.log(error.name + ":" + error.message);
     }
@@ -710,18 +716,18 @@ async function sendCommentRequests(
   userName,
   userID,
   elementsWithCommentLoc,
-  elementsWithIssueLoc,  
+  elementsWithIssueLoc,
   projectKey,
   issueKey,
   action,
-  context
+  context, 
+  channel
 ) {
   for (const commentElement of elementsWithCommentLoc) {
     for (const issueElement of elementsWithIssueLoc) {
       try {
         if (
-          action.submission[commentElement.elementID] ===
-          issueElement.elementID
+          action.submission[commentElement.elementID] === issueElement.elementID
         ) {
           description = `${commentElement.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
           issueKey = issueElement.issueKey;
@@ -741,16 +747,12 @@ async function sendCommentRequests(
           console.log(`Returned URL Comment: ${jiraIssueURL}`);
           if (typeof jiraIssueURL !== "undefined") {
             allElements.forEach((knowledgeElement, index) => {
-              if (
-                knowledgeElement.elementID === commentElement.elementID
-              ) {
+              if (knowledgeElement.elementID === commentElement.elementID) {
                 allElements.splice(index, 1);
               }
             });
             elementsUpdateMessage.forEach((updateElement, index) => {
-              if (
-                updateElement.elementID === commentElement.elementID
-              ) {
+              if (updateElement.elementID === commentElement.elementID) {
                 elementsUpdateMessage.splice(index, 1);
               }
             });
@@ -760,28 +762,25 @@ async function sendCommentRequests(
               userName,
               action.user,
               context.botToken,
-              testingAppChannelID,
+              channel,
               commentElement.elementType,
               commentElement.elementText,
               jiraIssueURL
             );
-            elementsFromMultMessage.forEach(
-              (knowledgeElement, index1) => {
-                if (
-                  knowledgeElement[0].elementTS ===
-                  commentElement.elementTS
-                ){
+            elementsFromMultMessage.forEach((knowledgeElement, index1) => {
+              if (knowledgeElement[0].elementTS === commentElement.elementTS) {
                 knowledgeElement.forEach((elementFromMessage, index2) => {
-                  if (commentElement.elementID === elementFromMessage.elementID) {
+                  if (
+                    commentElement.elementID === elementFromMessage.elementID
+                  ) {
                     knowledgeElement.splice(index2, 1);
                   }
                 });
-              } 
-              if (knowledgeElement.length === 0){
-                elementsFromMultMessage.splice(index1, 1);
-              }                       
               }
-            );
+              if (knowledgeElement.length === 0) {
+                elementsFromMultMessage.splice(index1, 1);
+              }
+            });
           } else {
             throw new UploadToJiraFailedException(
               "URL is undefined",
@@ -794,7 +793,7 @@ async function sendCommentRequests(
         await post_bot_messages.sendErrorToUser(
           app,
           context,
-          testingAppChannelID,
+          channel,
           userID,
           error.knowledgeElement
         );
