@@ -22,11 +22,11 @@ let description = "";
 let elementsWithIssueLoc = [];
 let elementsWithCommentLoc = [];
 let elementsUpdateMessage = [];
-let projectKey = "TES";
-let jiraServerURL = "https://cures.ifi.uni-heidelberg.de/jira";
 const pattAppMentionGreetingGerman = /^(hallo|servus|grüß gott|grüezi|moin|guten tag|guten morgen|guten abend|tach|na)(?:$|\s+.*)/i;
 const pattAppMentionGreetingEnglish = /^(hi|hey|hello|good evening|good morning|good afternoon|what's up|sup|whazzup|what's going on|yo|howdy|hiya)(?:$|\s+.*)/i;
 const pattMessageWithDecisionKnowledge = /.*:(decision|issue|pro|con|alternative):.*/;
+const projectKey = process.env.PROJECT_KEY;
+const jiraServerURL = process.env.JIRA_SERVER;
 const botUserToken = process.env.SLACK_BOT_TOKEN;
 let jiraIssueURL;
 let messageTS;
@@ -39,7 +39,7 @@ const app = new App({
 
 (async () => {
   // Startet die App
-  await app.start(process.env.PORT || 3000);
+  await app.start(process.env.PORT);
   console.log("⚡️ Slack-Jira app is running!");
 })();
 
