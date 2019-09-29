@@ -3,7 +3,8 @@
 
 //load enviroment variables
 const dotenv = require("dotenv")
-dotenv.config({ path: `${__dirname}./.env`});
+
+dotenv.config({ path: `${__dirname}/.env`});
 
 
 const jira_rest_handler = require("./jira-rest-handler");
