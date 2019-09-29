@@ -1,6 +1,10 @@
 "use strict";
 
-require("dotenv").config();
+
+//load enviroment variables
+const dotenv = require("dotenv")
+dotenv.config({ path: './.env'});
+
 
 const jira_rest_handler = require("./jira-rest-handler");
 
@@ -41,7 +45,7 @@ const app = new App({
 (async () => {
   // Startet die App
   await app.start(process.env.PORT);
-  console.log("⚡️ Slack-Jira app is running!");
+  console.log(`⚡️ Slack-Jira app is running on port: ${process.env.PORT}`);
 })();
 
 //can be used to delete old messages in a channel
