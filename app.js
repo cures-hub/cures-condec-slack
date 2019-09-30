@@ -62,6 +62,16 @@ async function getChannelHistory(userToken, botToken, channel, count) {
 
 //getChannelHistory(slackUserToken, botUserToken, testingAppChannelID, 30);
 
+//Bot tritt channel bei, wenn ein neuer Channel in dem Workspace erstellt wurde.
+app.event("channel_created", async ({event, context}) => {
+  const result = await app.client.channels.invite({
+    token: process.env.SLACK_USER_TOKEN, 
+    channel: event.channel.id,
+    user: context.botUserId
+  });
+  return result;
+});
+
 //Bot begrüßt ein neues Mitglied, wenn es dem Channel beitritt.
 app.event("member_joined_channel", async ({ event, context }) => {
   const result = await post_bot_messages.memberJoinChannelMessage(

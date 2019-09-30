@@ -1,8 +1,8 @@
 {
-  "name": "slack-jira-app",
+  "name": "cures-slack-condec",
   "version": "1.0.0",
   "description": "Slack App for Jira Integration",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
