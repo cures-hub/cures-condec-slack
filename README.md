@@ -26,6 +26,7 @@ Before you can CURES ConDec Slack, you need to create a new Slack App:
 5. on 'Bot Users' add a bot-user and give it an expressive name
 6. on 'Install App' install the App to your Slack workspace
 7. on 'OAuth & Permissions' add these Permission Scopes:
+  - 'channels:write'
   - 'chat:write:bot'
   - 'chat:write:user'
   - 'emoji:read'
@@ -34,6 +35,7 @@ Before you can CURES ConDec Slack, you need to create a new Slack App:
 8. on 'Event Subscriptions' use the toggle to turn it on and put in the URL of your http-server followed by /slack/events
 9. subscribe to these bot-events:
   - 'app_mention'
+  - 'channel_created'
   - 'member_joined_channel'
   - 'message.channels'
   - 'reaction_added'
