@@ -13,7 +13,9 @@ async function openSingleItemDialog(
   dialog_token,
   summary,
   knowledgetype,
-  documentationLocation
+  documentationLocation,
+  projectKey,
+  jiraServer
 ) {
   let dialog_elements = [];
   if (documentationLocation === "s") {
@@ -32,7 +34,7 @@ async function openSingleItemDialog(
       max_length: 20,
       min_length: 1,
       hint: `Gebe den Project-Key des Jira-Projects an.`,
-      value: "TES"
+      value: projectKey
     },
     {
       type: "text",
@@ -40,7 +42,7 @@ async function openSingleItemDialog(
       name: "jira_server",
       subtype: "url",
       hint: `Base-URL des Jira-Servers.`,
-      value: "https://cures.ifi.uni-heidelberg.de/jira"
+      value: jiraServer
     },
     {
       type: "select",
@@ -84,7 +86,9 @@ async function openMultItemDialog(
   button_trigger_id,
   dialog_token,
   elementsWithIssueLoc,
-  elementsWithCommentLoc
+  elementsWithCommentLoc,
+  projectKey,
+  jiraServer
 ) {
   let dialog_elements = [];
   dialog_elements.push(
@@ -95,7 +99,7 @@ async function openMultItemDialog(
       max_length: 20,
       min_length: 1,
       hint: `Gebe den Project-Key des Jira-Projects an.`,
-      value: "TES"
+      value: projectKey
     },
     {
       type: "text",
@@ -103,7 +107,7 @@ async function openMultItemDialog(
       name: "jira_server",
       subtype: "url",
       hint: `Base-URL des Jira-Servers.`,
-      value: "https://cures.ifi.uni-heidelberg.de/jira"
+      value: jiraServer
     }
   );
 

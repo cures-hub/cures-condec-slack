@@ -315,7 +315,9 @@ app.action("single_export_click", async ({ body, ack, context }) => {
     context.botToken,
     currentElement.elementText,
     currentElement.elementType,
-    currentElement.docLoc
+    currentElement.docLoc,
+    projectKey,
+    jiraServerURL
   );
 });
 
@@ -457,7 +459,9 @@ app.action("export-all-click", async ({ body, ack, context }) => {
     body.trigger_id,
     context.botToken,
     elementsWithIssueLoc,
-    elementsWithCommentLoc
+    elementsWithCommentLoc,
+    projectKey,
+    jiraServerURL
   );
 });
 
