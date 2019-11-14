@@ -48,7 +48,12 @@ You can find the Slack Signing Secret on your 'Basic Information' page and the B
 Use the port of your http-server.
 The Jira server and project key are default values that you can use for the export of decision knowledge from slack to your Jira project.
 Put in the Jira username and pw of your Jira account.
-Save the file and you can run the code via:
+When you have added all values to the variables save the .env file.
+Next Step is to install all needed dependencies:
+```
+npm install
+```
+Then you can run the code via:
 ```
 node app
 ```
