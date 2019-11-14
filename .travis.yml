@@ -3,12 +3,11 @@ language: node_js
 node_js: 
   - 10.16.3
   - 12.11.0
+before_script:
+  - npm install
 script:
   - node ./src/app
 notifications:
   email: false
-npm test
 before_install:
   - npm i -g npm@6.9.0  
-notifications:
-  email: false
