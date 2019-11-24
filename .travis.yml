@@ -6,7 +6,7 @@ node_js:
 before_script:
   - npm install
 script:
-  - node ./src/app
+  - npm run test:unit
 notifications:
   email: false
 before_install:
