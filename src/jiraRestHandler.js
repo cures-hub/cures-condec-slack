@@ -1,16 +1,14 @@
+/* jiraRestHandler.js
+ * In dieses Modul werden REST-Anfragen an Jira formuliert.
+ * Entscheidungswissenselemente werden erstellt, verlinkt oder abgefragt.
+ * Entscheidungswissenselemente können in vorhandenen JiraIssues eingefügt werden(im Issue Body),
+ * oder als neues JiraIssue zum Projekt hinzugefügt werden.(documentationLocation)
+ */
 const rp = require("request-promise");
 
-async function sendCreateIssueRequest(
-  projectKey,
-  summary,
-  type,
-  description,
-  documentationLocation,
-  username,
-  password,
-  host,
-  issueKeyofExistingElement
-) {
+// Ein Entscheidungswissenselementewird zu einem existierendem JiraProjekt hinzugefügt.
+// Als eigenes JiraIssue(documentElement =="i") oder im body eines exsitieren Issues.
+async function sendCreateIssueRequest(projectKey, summary, type, description, documentationLocation, username, password, host, issueKeyofExistingElement) {
   console.log(`URL für Request: ${host}`);
   console.log(`Issue-Key für Request: ${issueKeyofExistingElement}`);
   let options = {

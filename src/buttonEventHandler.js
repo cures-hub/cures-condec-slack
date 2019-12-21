@@ -1,6 +1,6 @@
-const post_bot_messages = require("./post-bot-messages");
+const post_bot_messages = require("./postBotMessages");
 
-const http_requests = require("./jira-rest-handler");
+const http_requests = require("./jiraRestHandler");
 
 async function singleExportClick(
   body,

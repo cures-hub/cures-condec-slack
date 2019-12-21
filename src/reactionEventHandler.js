@@ -1,4 +1,4 @@
-const post_bot_messages = require("./post-bot-messages");
+const post_bot_messages = require("./postBotMessages");
 require("dotenv").config();
 
 async function decisionKnowledgeReactionAdded(event, context, channel, app){
