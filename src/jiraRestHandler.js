@@ -1,16 +1,27 @@
-/* jiraRestHandler.js
- * In dieses Modul werden REST-Anfragen an Jira formuliert.
- * Entscheidungswissenselemente werden erstellt, verlinkt oder abgefragt.
- * Entscheidungswissenselemente können in vorhandenen JiraIssues eingefügt werden(im Issue Body),
- * oder als neues JiraIssue zum Projekt hinzugefügt werden.(documentationLocation)
- */
-const rp = require("request-promise");
+/*
+ This module implements the communication with the ConDec REST API and the JIRA API.
+ REST-calls to Jira are created.
+ Knowledge elements documented in Jira can be accessed, created, and linked.
+ Newly created decision knowledge elements can either be documented as separate Jira issues (documentation location "i") 
+ or in the description/a comment of an existing Jira issue (documentation location "s").
 
-// Ein Entscheidungswissenselementewird zu einem existierendem JiraProjekt hinzugefügt.
-// Als eigenes JiraIssue(documentElement =="i") oder im body eines exsitieren Issues.
-async function sendCreateIssueRequest(projectKey, summary, type, description, documentationLocation, username, password, host, issueKeyofExistingElement) {
-  console.log(`URL für Request: ${host}`);
-  console.log(`Issue-Key für Request: ${issueKeyofExistingElement}`);
+ Requires
+ * request-promise node module
+    
+ Is required by
+ * app.js
+ */
+const requestPromise = require("request-promise");
+
+/**
+ * Creates a new decision knowledge element in an existing Jira project. The
+ * element can either be documented as a separate Jira issue (documentation
+ * location "i") or in the description/a comment of an existing Jira issue
+ * (documentation location "s").
+ */
+async function sendCreateIssueRequest(projectKey, summary, type, description, documentationLocation, username, password, host, jiraIssueKey) {
+  console.log(`URL for request: ${host}`);
+  console.log(`Jira issue key for request: ${jiraIssueKey}`);
   let options = {
     method: "POST",
     uri: `${host}/rest/decisions/latest/decisions/createDecisionKnowledgeElement.json`,
@@ -28,19 +39,20 @@ async function sendCreateIssueRequest(projectKey, summary, type, description, do
       sendImmediately: true
     }
   };
-  if (issueKeyofExistingElement !== 0) {
-    options.uri = `${host}/rest/decisions/latest/decisions/createDecisionKnowledgeElement.json?keyOfExistingElement=${issueKeyofExistingElement}`;
+  if (jiraIssueKey !== 0) {
+    options.uri = `${host}/rest/decisions/latest/decisions/createDecisionKnowledgeElement.json?keyOfExistingElement=${jiraIssueKey}`;
   }
   let issueData = {};
-  await rp(options)
+  await requestPromise(options)
     .then(function(body) {
       console.log("Upload successful!  Server responded with:", body);
       issueData.url = body.url;
       issueData.issueID = body.id;
       return issueData;
     })
-    .catch(function(err) {
-      return console.error("upload failed:", err);
+    .catch(function(error) {
+      //console.error("upload failed:", error);
+      return error;
     });
   return issueData;
 }
@@ -70,7 +82,7 @@ async function sendGetIssueRequest(
       documentationLocation: documentationLocation
     }
   };
-  await rp(options)
+  await requestPromise(options)
     .then(function(body) {
       console.log("GET-Request successful!  Server responded with:", body);
       console.log(`URL: ${body.url}`);
@@ -116,7 +128,7 @@ async function linkIssueRequest(
       documentationLocationOfChild: documentationLocationOfChild
     }
   };
-  await rp(options)
+  await requestPromise(options)
     .then(function(body) {
       console.log("Link-Request successful! Server responded with:", body);
     })
