@@ -18,13 +18,15 @@ const requestPromise = require("request-promise");
  * decision knowledge element can either be documented as a separate Jira issue
  * (documentation location "i") or in the description/a comment of an existing
  * Jira issue (documentation location "s").
+ * 
+ * external references: app.js, buttonEventHandler.js
  */
 async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation, username, password, host, jiraIssueKey) {
   console.log("URL for request: ${host}");
   console.log("Jira issue key for request: ${jiraIssueKey}");
   let options = {
     method: "POST",
-    uri: "${host}/rest/decisions/latest/decisions/createDecisionKnowledgeElement.json",
+    uri: "${host}/rest/knowledge/latest/decisions/createDecisionKnowledgeElement.json",
     body: {
       projectKey: projectKey,
       summary: "${summary} [SLACK]",
@@ -54,10 +56,15 @@ async function createDecisionKnowledgeElement(projectKey, summary, type, descrip
   return null;
 }
 
+/**
+ * Retrieves an existing decision knowledge element from Jira.
+ * 
+ * external references: none
+ */
 async function getDecisionKnowledgeElement(projectKey, id, documentationLocation, username, password, host) {
   let options = {
     method: "GET",
-    uri: "${host}/rest/decisions/latest/decisions/getDecisionKnowledgeElement.json",
+    uri: "${host}/rest/knowledge/latest/decisions/getDecisionKnowledgeElement.json",
     json: true,
     auth: {
       user: username,
@@ -83,11 +90,16 @@ async function getDecisionKnowledgeElement(projectKey, id, documentationLocation
   return null;
 }
 
+/**
+ * Creates a link between two knowledge elements.
+ * 
+ * external references: app.js
+ */
 async function createLink(projectKey, knowledgeTypeOfChild, idOfParent, documentationLocationOfParent, idOfChild, 
 		documentationLocationOfChild, username, password, host) {
   let options = {
     method: "POST",
-    uri: "${host}/rest/decisions/latest/decisions/createLink.json",
+    uri: "${host}/rest/knowledge/latest/decisions/createLink.json",
     json: true,
     auth: {
       user: username,
