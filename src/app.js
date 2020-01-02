@@ -1,5 +1,10 @@
 "use strict";
 
+/*app.js
+ *Dieses Modul ist der Kern der app. Hier wird die app gestartet,
+ *initalisiert und Umgebungsvariablen geladen. 
+ *Hier findet man auch die möglichen Events auf die die app reagiert.
+ */
 
 //load enviroment variables
 const dotenv = require("dotenv")
@@ -7,15 +12,15 @@ const dotenv = require("dotenv")
 dotenv.config({ path: `${__dirname}/.env`});
 
 
-const jira_rest_handler = require("./jira-rest-handler");
+const conDecAPI = require("./condec.api");
 
-const reaction_event_listener = require("./reaction-eventlistener");
+const reactionEventHandler = require("./reactionEventHandler");
 
-const message_listener = require("./message-listener");
+const messageHandler = require("./messageHandler");
 
-const post_bot_messages = require("./post-bot-messages");
+const postBotMessages = require("./postBotMessages");
 
-const create_dialog = require("./createDialog");
+const createDialog = require("./createDialog");
 
 const { App, subtype } = require("@slack/bolt");
 
@@ -74,13 +79,7 @@ app.event("channel_created", async ({event, context}) => {
 
 //Bot begrüßt ein neues Mitglied, wenn es dem Channel beitritt.
 app.event("member_joined_channel", async ({ event, context }) => {
-  const result = await post_bot_messages.memberJoinChannelMessage(
-    app,
-    context.botToken,
-    event.user,
-    event.channel,
-    context.botUserId
-  );
+  const result = await postBotMessages.memberJoinChannelMessage(app, context.botToken, event.user, event.channel, context.botUserId);
   return result;
 });
 
@@ -92,143 +91,74 @@ app.event("app_mention", async ({ event, context }) => {
   console.log(`messageText: ${messageText}`);
   let greeting = "";
   if (pattAppMentionGreetingEnglish.test(messageText)) {
-    if (
-      messageText.match(pattAppMentionGreetingEnglish)[0] ===
-      messageText.match(pattAppMentionGreetingEnglish)[1]
-    ) {
+    if (messageText.match(pattAppMentionGreetingEnglish)[0] === messageText.match(pattAppMentionGreetingEnglish)[1]) {
       greeting = messageText;
     } else {
       greeting = messageText.match(pattAppMentionGreetingEnglish)[1];
     }
 
     console.log(`messageText: ${messageText}`);
-    console.log(
-      `match of messageText: ${messageText.match(
-        pattAppMentionGreetingEnglish
-      )}`
-    );
-
+    console.log(`match of messageText: ${messageText.match(pattAppMentionGreetingEnglish)}`);
     console.log(`matched greeting: ${greeting}`);
-    console.log(
-      `match 1.index: ${messageText.match(pattAppMentionGreetingEnglish)[0]}`
-    );
-    console.log(
-      `match 2.index: ${messageText.match(pattAppMentionGreetingEnglish)[1]}`
-    );
-    const result = await post_bot_messages.greetUserEnglish(
-      app,
-      context.botToken,
-      event.channel,
-      event.user,
-      greeting,
-      botUserID
-    );
+    console.log(`match 1.index: ${messageText.match(pattAppMentionGreetingEnglish)[0]}`);
+    console.log(`match 2.index: ${messageText.match(pattAppMentionGreetingEnglish)[1]}`);
+	
+    const result = await postBotMessages.greetUserEnglish(app, context.botToken, event.channel, event.user, greeting, botUserID);
     console.log(result);
 
     return result;
+	
   } else if (pattAppMentionGreetingGerman.test(messageText)) {
-    if (
-      messageText.match(pattAppMentionGreetingGerman)[0] ===
-      messageText.match(pattAppMentionGreetingGerman)[1]
-    ) {
+    if (messageText.match(pattAppMentionGreetingGerman)[0] === messageText.match(pattAppMentionGreetingGerman)[1]) {
       greeting = messageText;
     } else {
       greeting = messageText.match(pattAppMentionGreetingGerman)[1];
     }
     console.log(`matched greeting: ${greeting}`);
-    const result = await post_bot_messages.greetUserGerman(
-      app,
-      context.botToken,
-      event.channel,
-      event.user,
-      greeting,
-      botUserID
-    );
+    const result = await postBotMessages.greetUserGerman(app, context.botToken, event.channel, event.user, greeting, botUserID);
     return result;
+	
   } else if (/^(help|get help).*/i.test(messageText)) {
-    const result = await post_bot_messages.helpMessageEnglish(
-      app,
-      context.botToken,
-      event.channel,
-      event.user
-    );
+    const result = await postBotMessages.helpMessageEnglish(app, context.botToken, event.channel, event.user);
     return result;
+	
   } else if (/^(hilfe).*/i.test(messageText)) {
-    const result = await post_bot_messages.helpMessageGerman(
-      app,
-      context.botToken,
-      event.channel,
-      event.user
-    );
+    const result = await postBotMessages.helpMessageGerman(app, context.botToken, event.channel, event.user);
     return result;
+	
   } else {
-    const result = await post_bot_messages.botMentionGeneralMessage(
-      app,
-      context.botToken,
-      event.channel,
-      event.user,
-      botUserID
-    );
+    const result = await postBotMessages.botMentionGeneralMessage(app, context.botToken, event.channel, event.user, botUserID);
     return result;
   }
 });
 
+//listener für button "show me more" in der Hilfennachricht zu Export dk to Jira, englisch.
 app.action("export_help_click_english", async ({ body, ack, context }) => {
   ack();
-  await post_bot_messages.exportHelpMessageEnglish(
-    app,
-    context.botToken,
-    body.channel.id,
-    body.user.id
-  );
+  await postBotMessages.exportHelpMessageEnglish(app, context.botToken, body.channel.id, body.user.id);
 });
 
+//listener für button "show me more" in der Hilfennachricht zu Export dk to Jira, deutsch.
 app.action("export_help_click_german", async ({ body, ack, context }) => {
   ack();
-  await post_bot_messages.exportHelpMessageGerman(
-    app,
-    context.botToken,
-    body.channel.id,
-    body.user.id
-  );
+  await postBotMessages.exportHelpMessageGerman(app, context.botToken, body.channel.id, body.user.id);
 });
 
+//listener für button "show me more" in der Hilfennachricht zu Import dk to Jira, englisch.
 app.action("import_help_click_english", async ({ body, ack, context }) => {
   ack();
-  await post_bot_messages.importHelpMessageEnglish(
-    app,
-    context.botToken,
-    body.channel.id,
-    body.user.id
-  );
+  await postBotMessages.importHelpMessageEnglish(app, context.botToken, body.channel.id, body.user.id);
 });
 
+//listener für button "show me more" in der Hilfennachricht zu Import dk to Jira, deutsch.
 app.action("import_help_click_german", async ({ body, ack, context }) => {
   ack();
-  await post_bot_messages.importHelpMessageGerman(
-    app,
-    context.botToken,
-    body.channel.id,
-    body.user.id
-  );
+  await postBotMessages.importHelpMessageGerman(app, context.botToken, body.channel.id, body.user.id);
 });
 
 //handler für Nachrichten in denen Entscheidungswissen gefunden wurde
-async function decisionKnowledgeMessageHandler(
-  text,
-  match,
-  botToken,
-  user,
-  channel
-) {
-  knowledgeElements = await message_listener.messageWithDecisionKnowledge(
-    text,
-    match,
-    botToken,
-    app,
-    channel,
-    user
-  );
+async function decisionKnowledgeMessageHandler(text, match, botToken, user, channel) {
+  knowledgeElements = await messageHandler.messageWithDecisionKnowledge(text, match, botToken, app, channel, user);
   allElements.push(...knowledgeElements);
   if (knowledgeElements.length > 0) {
     if (knowledgeElements[0].elementMessageType === 2) {
@@ -244,38 +174,20 @@ async function decisionKnowledgeMessageHandler(
 
 //listener für Nachrichten in denen ein oder meherere "Entscheidungswissen-Emoji" vorkommen.
 app.message(pattMessageWithDecisionKnowledge, async ({ message, context }) => {
-  decisionKnowledgeMessageHandler(
-    context.matches[0],
-    context.matches[1],
-    context.botToken,
-    message.user,
-    message.channel
-  );
+  decisionKnowledgeMessageHandler(context.matches[0], context.matches[1], context.botToken, message.user, message.channel);
 });
 
-//listenener für Nachrichten, die bearbeitet wurden und ein "Entscheidungswissen-Emoji" hinzugefügt wurde
+//listener für Nachrichten, die bearbeitet wurden und ein "Entscheidungswissen-Emoji" hinzugefügt wurde
 app.message(subtype("message_changed"), ({ message, context }) => {
   if (pattMessageWithDecisionKnowledge.test(message.message.text)) {
-    let regexResult = message.message.text.match(
-      pattMessageWithDecisionKnowledge
-    );
-    decisionKnowledgeMessageHandler(
-      regexResult[0],
-      regexResult[1],
-      context.botToken,
-      message.message.user
-    );
+    let regexResult = message.message.text.match(pattMessageWithDecisionKnowledge);
+    decisionKnowledgeMessageHandler(regexResult[0], regexResult[1], context.botToken, message.message.user);
   }
 });
 
 //listener für das Hinzufügen einer Reaktion mit einem "Entscheidungswissen-Emoji"
 app.event("reaction_added", async ({ event, context }) => {
-  knowledgeElements = await reaction_event_listener.decisionKnowledgeReactionAdded(
-    event,
-    context,
-    event.item.channel,
-    app
-  );
+  knowledgeElements = await reactionEventHandler.decisionKnowledgeReactionAdded(event, context, event.item.channel, app);
   allElements.push(...knowledgeElements);
   console.log("Alle Elemente aktualisiert:");
   allElements.forEach(element => {
@@ -308,35 +220,25 @@ app.action("single_export_click", async ({ body, ack, context }) => {
       console.log(element);
     }
   });
-  await create_dialog.openSingleItemDialog(
-    app,
-    body.user.name,
-    body.trigger_id,
-    context.botToken,
-    currentElement.elementText,
-    currentElement.elementType,
-    currentElement.docLoc,
-    projectKey,
-    jiraServerURL
-  );
+  await createDialog.openSingleItemDialog(app, body.user.name, body.trigger_id, context.botToken,
+											currentElement.elementText, currentElement.elementType, currentElement.docLoc, projectKey, jiraServerURL);
 });
 
 // listens for the single-item dialog submission and gets triggered when a user submits the dialog
-app.action(
-  { callback_id: "exportdialog-46e2b0" },
-  async ({ ack, action, context, body }) => {
+app.action({callback_id: "exportdialog-46e2b0" }, async ({ ack, action, context, body }) => {
     try {
       ack();
       let keyOfExistingJiraIssue = 0;
-      if (typeof action.submission.issue_key !== "undefined")
+      if (typeof action.submission.issue_key !== "undefined"){
         keyOfExistingJiraIssue = action.submission.issue_key.trim();
+	  }
       projectKey = action.submission.project_key.trim();
       currentElement.elementText = action.submission.elementText;
       currentElement.elementType = action.submission.elementType;
       description = action.submission.description;
       jiraServerURL = action.submission.jira_server.trim();
 
-      let jiraIssueData = await jira_rest_handler.sendCreateIssueRequest(
+      let jiraIssueData = await conDecAPI.createDecisionKnowledgeElement(
         projectKey,
         currentElement.elementText,
         currentElement.elementType,
@@ -357,7 +259,7 @@ app.action(
               allElements.splice(index, 1);
             }
           });
-          await post_bot_messages.updateSingleItemMessage(
+          await postBotMessages.updateSingleItemMessage(
             app,
             body.user.name,
             context,
@@ -368,7 +270,7 @@ app.action(
             currentElement.elementTS
           );
         } else {
-          await post_bot_messages.tellUserAboutSuccesfullUploadtoJira(
+          await postBotMessages.tellUserAboutSuccesfullUploadtoJira(
             app,
             body.user.name,
             action.user,
@@ -391,7 +293,7 @@ app.action(
             }
           });
           if (elementsUpdateMessage.length > 0) {
-            let result = await post_bot_messages.updateMultItemMessage(
+            let result = await postBotMessages.updateMultItemMessage(
               app,
               body.user.id,
               context,
@@ -399,7 +301,7 @@ app.action(
               currentElement.elementTS,
               elementsUpdateMessage
             );
-            elementsUpdateMessage = message_listener.addIDsToKnowledgeElements(
+            elementsUpdateMessage = messageHandler.addIDsToKnowledgeElements(
               result,
               elementsUpdateMessage
             );
@@ -426,7 +328,7 @@ app.action(
       }
     } catch (error) {
       console.error(error);
-      await post_bot_messages.sendErrorToUser(
+      await postBotMessages.sendErrorToUser(
         app,
         context,
         body.channel.id,
@@ -435,8 +337,7 @@ app.action(
       );
       console.log(error.name + ":" + error.message);
     }
-  }
-);
+  });
 
 // listens for the user to click on the "Export all"-Button and opens a dialog
 app.action("export-all-click", async ({ body, ack, context }) => {
@@ -453,7 +354,7 @@ app.action("export-all-click", async ({ body, ack, context }) => {
   elementsWithCommentLoc = knowledgeElementsForDialog.filter(
     element => element.docLoc === "s"
   );
-  await create_dialog.openMultItemDialog(
+  await createDialog.openMultItemDialog(
     app,
     body.user.name,
     body.trigger_id,
@@ -466,9 +367,7 @@ app.action("export-all-click", async ({ body, ack, context }) => {
 });
 
 // listens for the mult-item dialog submission and gets triggered when a user submits the dialog
-app.action(
-  { callback_id: "exportdialog-73f4x0" },
-  async ({ ack, action, context, body }) => {
+app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context, body }) => {
     try {
       ack();
       let keyOfExistingJiraIssue = 0;
@@ -511,7 +410,7 @@ app.action(
         if (numOfElementsWithIssueLoc > 1) {
           elementsWithIssueLoc.forEach((element, index) => {
             if (index + 1 !== numOfElementsWithIssueLoc) {
-              jira_rest_handler.linkIssueRequest(
+              conDecAPI.createLink(
                 projectKey,
                 elementsWithIssueLoc[index + 1].elementType,
                 element.jiraID,
@@ -535,7 +434,7 @@ app.action(
             ].trim();
             console.log(`Erhaltener Issue-Key: ${keyOfExistingJiraIssue}`);
 
-            let jiraIssueData = await jira_rest_handler.sendCreateIssueRequest(
+            let jiraIssueData = await conDecAPI.createDecisionKnowledgeElement(
               projectKey,
               commentElement.elementText,
               commentElement.elementType,
@@ -559,7 +458,7 @@ app.action(
                   elementsUpdateMessage.splice(index, 1);
                 }
               });
-              await post_bot_messages.tellUserAboutSuccesfullUploadtoJira(
+              await postBotMessages.tellUserAboutSuccesfullUploadtoJira(
                 app,
                 body.user.name,
                 action.user,
@@ -593,7 +492,7 @@ app.action(
             }
           } catch (error) {
             console.error(error);
-            await post_bot_messages.sendErrorToUser(
+            await postBotMessages.sendErrorToUser(
               app,
               context,
               body.channel.id,
@@ -609,7 +508,7 @@ app.action(
         elementsUpdateMessage.length > 0 &&
         elementsUpdateMessage.length < numOfMultMessageElements
       ) {
-        let result = post_bot_messages.updateMultItemMessage(
+        let result = postBotMessages.updateMultItemMessage(
           app,
           body.user.id,
           context,
@@ -617,7 +516,7 @@ app.action(
           messageTS,
           elementsUpdateMessage
         );
-        elementsUpdateMessage = message_listener.addIDsToKnowledgeElements(
+        elementsUpdateMessage = messageHandler.addIDsToKnowledgeElements(
           result,
           elementsUpdateMessage
         );
@@ -632,7 +531,7 @@ app.action(
       }
     } catch (error) {
       console.error(error);
-      await post_bot_messages.sendErrorToUser(
+      await postBotMessages.sendErrorToUser(
         app,
         context,
         body.channel.id,
@@ -641,8 +540,7 @@ app.action(
       );
       console.log(error.name + ":" + error.message);
     }
-  }
-);
+  });
 
 async function sendIssueRequests(
   userName,
@@ -658,10 +556,10 @@ async function sendIssueRequests(
     try {
       messageTS = element.elementTS;
       description = `${element.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
-      console.log('Issue-Key vor sendCreateIssueRequest:');
+      console.log('Issue-Key for createDecisionKnowledgeElement:');
       console.log(issueKey);
       
-      let jiraIssueData = await jira_rest_handler.sendCreateIssueRequest(
+      let jiraIssueData = await conDecAPI.createDecisionKnowledgeElement(
         projectKey,
         element.elementText,
         element.elementType,
@@ -690,7 +588,7 @@ async function sendIssueRequests(
             elementsUpdateMessage.splice(index, 1);
           }
         });
-        await post_bot_messages.tellUserAboutSuccesfullUploadtoJira(
+        await postBotMessages.tellUserAboutSuccesfullUploadtoJira(
           app,
           userName,
           action.user,
@@ -719,7 +617,7 @@ async function sendIssueRequests(
       }
     } catch (error) {
       console.error(error);
-      await post_bot_messages.sendErrorToUser(
+      await postBotMessages.sendErrorToUser(
         app,
         context,
         channel,
@@ -752,7 +650,7 @@ async function sendCommentRequests(
           description = `${commentElement.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
           issueKey = issueElement.issueKey;
 
-          let jiraIssueData = await jira_rest_handler.sendCreateIssueRequest(
+          let jiraIssueData = await conDecAPI.createDecisionKnowledgeElement(
             projectKey,
             commentElement.elementText,
             commentElement.elementType,
@@ -777,7 +675,7 @@ async function sendCommentRequests(
               }
             });
 
-            await post_bot_messages.tellUserAboutSuccesfullUploadtoJira(
+            await postBotMessages.tellUserAboutSuccesfullUploadtoJira(
               app,
               userName,
               action.user,
@@ -810,7 +708,7 @@ async function sendCommentRequests(
         }
       } catch (error) {
         console.error(error);
-        await post_bot_messages.sendErrorToUser(
+        await postBotMessages.sendErrorToUser(
           app,
           context,
           channel,

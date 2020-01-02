@@ -832,6 +832,38 @@ async function sendErrorToUser(app, context, channel, user, knowledgeElement) {
   return result;
 }
 
+
+async function sendChangedDesicionKnowledgeToChannel(  app, user, botToken, channel, knowledgetype, summary, jiraIssueURL){
+	
+	const result = await app.client.chat.postMessage({
+    token: botToken,
+    channel: channel,
+    user: user,
+    blocks:[
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `Dieses _Enscheidungswissen_  wurde im Jira aktualisiert: \n
+				• *Typ* :${knowledgetype}: (${knowledgetype}) \n 
+				• *Titel* : "${summary}" \n`
+        }
+      },
+      {
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Get to Jira"
+					},
+					"url": "${jiraIssueURL}"
+				}
+			]
+		}
+    ]
+}
+
 module.exports.askForJiraExportSingleElement = askForJiraExportSingleElement;
 module.exports.updateSingleItemMessage = updateSingleItemMessage;
 module.exports.askForJiraExportMultElements = askForJiraExportMultElements;
@@ -849,3 +881,4 @@ module.exports.exportHelpMessageGerman = exportHelpMessageGerman;
 module.exports.importHelpMessageEnglish = importHelpMessageEnglish;
 module.exports.importHelpMessageGerman = importHelpMessageGerman;
 module.exports.botMentionGeneralMessage = botMentionGeneralMessage;
+module.exports.sendChangedDesicionKnowledgeToChannel = sendChangedDesicionKnowledgeToChannel;
