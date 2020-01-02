@@ -27,7 +27,7 @@ async function createDecisionKnowledgeElement(projectKey, summary, type, descrip
   console.log("Jira issue key for request: ${jiraIssueKey}");
   let options = {
     method: "POST",
-    uri: "${host}/rest/knowledge/latest/decisions/createDecisionKnowledgeElement.json",
+    uri: "${host}/rest/condec/latest/knowledge/createDecisionKnowledgeElement.json",
     body: {
       projectKey: projectKey,
       summary: "${summary} [SLACK]",
@@ -65,7 +65,7 @@ async function createDecisionKnowledgeElement(projectKey, summary, type, descrip
 async function getDecisionKnowledgeElement(projectKey, id, documentationLocation, username, password, host) {
   let options = {
     method: "GET",
-    uri: "${host}/rest/knowledge/latest/decisions/getDecisionKnowledgeElement.json",
+    uri: "${host}/rest/condec/latest/knowledge/getDecisionKnowledgeElement.json",
     json: true,
     auth: {
       user: username,
@@ -100,7 +100,7 @@ async function createLink(projectKey, knowledgeTypeOfChild, idOfParent, document
 		documentationLocationOfChild, username, password, host) {
   let options = {
     method: "POST",
-    uri: "${host}/rest/knowledge/latest/decisions/createLink.json",
+    uri: "${host}/rest/condec/latest/knowledge/createLink.json",
     json: true,
     auth: {
       user: username,
