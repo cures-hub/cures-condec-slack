@@ -150,3 +150,4 @@ async function openMultItemDialog(app, user, button_trigger_id, dialog_token, el
 
 module.exports.openMultItemDialog = openMultItemDialog;
 module.exports.openSingleItemDialog = openSingleItemDialog;
+module.exports.knowledgeTypeOptions = knowledgeTypeOptions;
