@@ -160,3 +160,4 @@ async function openMultItemDialog(
 
 module.exports.openMultItemDialog = openMultItemDialog;
 module.exports.openSingleItemDialog = openSingleItemDialog;
+module.exports.knowledgeTypeOptions = knowledgeTypeOptions;
