@@ -20,14 +20,14 @@ const requestPromise = require("request-promise");
  * Jira issue (documentation location "s").
  */
 async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation, username, password, host, jiraIssueKey) {
-  console.log(`URL for request: ${host}`);
-  console.log(`Jira issue key for request: ${jiraIssueKey}`);
+  console.log("URL for request: ${host}");
+  console.log("Jira issue key for request: ${jiraIssueKey}");
   let options = {
     method: "POST",
-    uri: `${host}/rest/decisions/latest/decisions/createDecisionKnowledgeElement.json`,
+    uri: "${host}/rest/decisions/latest/decisions/createDecisionKnowledgeElement.json",
     body: {
       projectKey: projectKey,
-      summary: `${summary} [SLACK]`,
+      summary: "${summary} [SLACK]",
       type: type,
       description: description,
       documentationLocation: documentationLocation
@@ -40,36 +40,24 @@ async function createDecisionKnowledgeElement(projectKey, summary, type, descrip
     }
   };
   if (jiraIssueKey !== 0) {
-    options.uri = `${host}/rest/decisions/latest/decisions/createDecisionKnowledgeElement.json?keyOfExistingElement=${jiraIssueKey}`;
+    options.uri += "?keyOfExistingElement=${jiraIssueKey}";
   }
-  let issueData = {};
   await requestPromise(options)
-    .then(function(body) {
-      console.log("Upload successful!  Server responded with:", body);
-      issueData.url = body.url;
-      issueData.issueID = body.id;
-      return issueData;
+    .then(function(element) {
+      console.log("Upload successful! Server responded with:", element);
+      return element;
     })
     .catch(function(error) {
-      // console.error("upload failed:", error);
+      console.error("upload failed:", error);
       return error;
     });
-  return issueData;
+  return null;
 }
 
-async function getDecisionKnowledgeElement(
-  projectKey,
-  id,
-  documentationLocation,
-  username,
-  password,
-  host
-) {
-  let jiraIssueData = {};
+async function getDecisionKnowledgeElement(projectKey, id, documentationLocation, username, password, host) {
   let options = {
     method: "GET",
-    uri: `${host}/rest/decisions/latest/decisions/getDecisionKnowledgeElement.json`,
-
+    uri: "${host}/rest/decisions/latest/decisions/getDecisionKnowledgeElement.json",
     json: true,
     auth: {
       user: username,
@@ -83,37 +71,23 @@ async function getDecisionKnowledgeElement(
     }
   };
   await requestPromise(options)
-    .then(function(body) {
-      console.log("GET-Request successful!  Server responded with:", body);
-      console.log(`URL: ${body.url}`);
-      jiraIssueData.jiraIssueURL = body.url;
-      jiraIssueData.summary = body.summary;
-      jiraIssueData.knowledgeType = body.type;
-      console.log(`JiraIssueURL: ${jiraIssueData.jiraIssueURL}`);
+    .then(function(element) {
+      console.log("GET-Request successful! Server responded with:", element);
+      console.log("URL: ${element.url}");
+      return element;
     })
     .catch(function(error) {
       console.error("GET-Request failed:", error);
       return error;
     });
-
-  return jiraIssueData;
+  return null;
 }
 
-async function createLink(
-  projectKey,
-  knowledgeTypeOfChild,
-  idOfParent,
-  documentationLocationOfParent,
-  idOfChild,
-  documentationLocationOfChild,
-  username,
-  password,
-  host
-) {
+async function createLink(projectKey, knowledgeTypeOfChild, idOfParent, documentationLocationOfParent, idOfChild, 
+		documentationLocationOfChild, username, password, host) {
   let options = {
     method: "POST",
-    uri: `${host}/rest/decisions/latest/decisions/createLink.json`,
-
+    uri: "${host}/rest/decisions/latest/decisions/createLink.json",
     json: true,
     auth: {
       user: username,
