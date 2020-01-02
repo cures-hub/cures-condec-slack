@@ -10,3 +10,5 @@ notifications:
   email: false
 before_install:
   - npm i -g npm@6.9.0  
+after_success:
+  - ./bin/codecov -e TRAVIS_NODE_VERSION -f coverage/*.json
