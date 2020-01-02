@@ -21,7 +21,8 @@ const requestPromise = require("request-promise");
  * 
  * external references: app.js, buttonEventHandler.js
  */
-async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation, username, password, host, jiraIssueKey) {
+async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation, 
+		username, password, host, jiraIssueKey) {
   console.log("URL for request: ${host}");
   console.log("Jira issue key for request: ${jiraIssueKey}");
   let options = {

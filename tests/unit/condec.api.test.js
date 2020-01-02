@@ -1,5 +1,4 @@
-const conDecAPI = require("../../src/jiraRestHandler");
-let issueData = {};
+const conDecAPI = require("../../src/condec.api");
 
 test("Test createDecisionKnowledgeElement with empty input", async () => {
 	  return conDecAPI.createDecisionKnowledgeElement().catch(e => expect(e).toMatch("error"));

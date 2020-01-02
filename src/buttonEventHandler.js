@@ -1,6 +1,6 @@
 const post_bot_messages = require("./postBotMessages");
 
-const http_requests = require("./jiraRestHandler");
+const conDecAPI = require("./condec.api");
 
 async function singleExportClick(
   body,
@@ -17,7 +17,7 @@ async function singleExportClick(
     // Acknowledge the action
     ack();
 
-    jiraIssueURL = await http_requests.createDecisionKnowledgeElement(
+    jiraIssueURL = await conDecAPI.createDecisionKnowledgeElement(
       "TES",
       `"${summary}"`,
       `${knowledgetype}`,
