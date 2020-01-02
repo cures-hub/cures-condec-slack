@@ -15,11 +15,11 @@ const requestPromise = require("request-promise");
 
 /**
  * Creates a new decision knowledge element in an existing Jira project. The
- * element can either be documented as a separate Jira issue (documentation
- * location "i") or in the description/a comment of an existing Jira issue
- * (documentation location "s").
+ * decision knowledge element can either be documented as a separate Jira issue
+ * (documentation location "i") or in the description/a comment of an existing
+ * Jira issue (documentation location "s").
  */
-async function sendCreateIssueRequest(projectKey, summary, type, description, documentationLocation, username, password, host, jiraIssueKey) {
+async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation, username, password, host, jiraIssueKey) {
   console.log(`URL for request: ${host}`);
   console.log(`Jira issue key for request: ${jiraIssueKey}`);
   let options = {
@@ -51,13 +51,13 @@ async function sendCreateIssueRequest(projectKey, summary, type, description, do
       return issueData;
     })
     .catch(function(error) {
-      //console.error("upload failed:", error);
+      // console.error("upload failed:", error);
       return error;
     });
   return issueData;
 }
 
-async function sendGetIssueRequest(
+async function getDecisionKnowledgeElement(
   projectKey,
   id,
   documentationLocation,
@@ -91,14 +91,15 @@ async function sendGetIssueRequest(
       jiraIssueData.knowledgeType = body.type;
       console.log(`JiraIssueURL: ${jiraIssueData.jiraIssueURL}`);
     })
-    .catch(function(err) {
-      return console.error("GET-Request failed:", err);
+    .catch(function(error) {
+      console.error("GET-Request failed:", error);
+      return error;
     });
 
   return jiraIssueData;
 }
 
-async function linkIssueRequest(
+async function createLink(
   projectKey,
   knowledgeTypeOfChild,
   idOfParent,
@@ -132,13 +133,14 @@ async function linkIssueRequest(
     .then(function(body) {
       console.log("Link-Request successful! Server responded with:", body);
     })
-    .catch(function(err) {
-      return console.error("Link-Request failed:", err);
+    .catch(function(error) {
+      console.error("Link-Request failed:", error)
+      return error;
     });
 
   return;
 }
 
-module.exports.linkIssueRequest = linkIssueRequest;
-module.exports.sendCreateIssueRequest = sendCreateIssueRequest;
-module.exports.sendGetIssueRequest = sendGetIssueRequest;
+module.exports.createDecisionKnowledgeElement = createDecisionKnowledgeElement;
+module.exports.getDecisionKnowledgeElement = getDecisionKnowledgeElement;
+module.exports.createLink = createLink;

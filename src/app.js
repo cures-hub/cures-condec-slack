@@ -238,7 +238,7 @@ app.action({callback_id: "exportdialog-46e2b0" }, async ({ ack, action, context,
       description = action.submission.description;
       jiraServerURL = action.submission.jira_server.trim();
 
-      let jiraIssueData = await jiraRestHandler.sendCreateIssueRequest(
+      let jiraIssueData = await jiraRestHandler.createDecisionKnowledgeElement(
         projectKey,
         currentElement.elementText,
         currentElement.elementType,
@@ -410,7 +410,7 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
         if (numOfElementsWithIssueLoc > 1) {
           elementsWithIssueLoc.forEach((element, index) => {
             if (index + 1 !== numOfElementsWithIssueLoc) {
-              jiraRestHandler.linkIssueRequest(
+              jiraRestHandler.createLink(
                 projectKey,
                 elementsWithIssueLoc[index + 1].elementType,
                 element.jiraID,
@@ -434,7 +434,7 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
             ].trim();
             console.log(`Erhaltener Issue-Key: ${keyOfExistingJiraIssue}`);
 
-            let jiraIssueData = await jiraRestHandler.sendCreateIssueRequest(
+            let jiraIssueData = await jiraRestHandler.createDecisionKnowledgeElement(
               projectKey,
               commentElement.elementText,
               commentElement.elementType,
@@ -556,10 +556,10 @@ async function sendIssueRequests(
     try {
       messageTS = element.elementTS;
       description = `${element.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
-      console.log('Issue-Key vor sendCreateIssueRequest:');
+      console.log('Issue-Key for createDecisionKnowledgeElement:');
       console.log(issueKey);
       
-      let jiraIssueData = await jiraRestHandler.sendCreateIssueRequest(
+      let jiraIssueData = await jiraRestHandler.createDecisionKnowledgeElement(
         projectKey,
         element.elementText,
         element.elementType,
@@ -650,7 +650,7 @@ async function sendCommentRequests(
           description = `${commentElement.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
           issueKey = issueElement.issueKey;
 
-          let jiraIssueData = await jiraRestHandler.sendCreateIssueRequest(
+          let jiraIssueData = await jiraRestHandler.createDecisionKnowledgeElement(
             projectKey,
             commentElement.elementText,
             commentElement.elementType,

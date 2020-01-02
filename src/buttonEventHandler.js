@@ -17,7 +17,7 @@ async function singleExportClick(
     // Acknowledge the action
     ack();
 
-    jiraIssueURL = await http_requests.sendCreateIssueRequest(
+    jiraIssueURL = await http_requests.createDecisionKnowledgeElement(
       "TES",
       `"${summary}"`,
       `${knowledgetype}`,
