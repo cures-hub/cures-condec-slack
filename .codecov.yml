@@ -1,0 +1,11 @@
+codecov:
+  notify:
+    require_ci_to_pass: yes
+coverage:
+  precision: 2
+  round: up
+  range: "50...90"
+  status:
+    patch:
+      default:
+        target: 65%
