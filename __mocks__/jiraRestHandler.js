@@ -1,4 +1,5 @@
 /*
+ * __mock__ jiraRestHandler.js
  * Diese funktionenn sollen die Anworten von Jira immitieren, so dass andere Funktionen
  * getestet werden können ohne tatsächlich anfragen an Jira zu schicken.
  *
