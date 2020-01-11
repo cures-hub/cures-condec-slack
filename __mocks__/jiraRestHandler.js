@@ -4,6 +4,7 @@
  * getestet werden können ohne tatsächlich anfragen an Jira zu schicken.
  *
 */
+//TODO umbenennn
 async function sendCreateIssueRequest(projectKey, summary, type, description, documentationLocation, username, password, host, issueKeyofExistingElement) {
   return Promise.resolve({
 	  url: "mock.jiraRequest.createIssue",
@@ -11,6 +12,7 @@ async function sendCreateIssueRequest(projectKey, summary, type, description, do
   });
 }
 
+//TODO umbenennn
 async function sendGetIssueRequest(projectKey, id, documentationLocation, username, password, host)
 {
 	return Promise.resolve(
@@ -21,5 +23,6 @@ async function sendGetIssueRequest(projectKey, id, documentationLocation, userna
 	});
 }
 
+//TODO umbenennn 
 export.sendGetIssueRequest = sendGetIssueRequest;
 export.sendCreateIssueRequest = sendCreateIssueRequest;
