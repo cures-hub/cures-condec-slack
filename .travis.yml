@@ -1,14 +1,14 @@
 sudo: false
 language: node_js
 node_js: 
-  - 10.16.3
   - 12.11.0
+before_script:
+  - npm install
 script:
-  - node ./src/app
+  - npm run test:unit
 notifications:
   email: false
-npm test
 before_install:
   - npm i -g npm@6.9.0  
-notifications:
-  email: false
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

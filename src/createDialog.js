@@ -1,3 +1,9 @@
+/* createDialog.js
+ * Dieses Modul umfasst den Exportdialog von Entscheidungswissen nach Jira.
+ * Layout und callback_id bei clicken von Buttons im Dialog werden festgelegt.
+ */
+ 
+// Mögliche Entscheidungswissenstypen.
 const knowledgeTypeOptions = [
   { label: "Issue", value: "issue" },
   { label: "Alternative", value: "alternative" },
@@ -6,17 +12,8 @@ const knowledgeTypeOptions = [
   { label: "Entscheidung", value: "decision" }
 ];
 
-async function openSingleItemDialog(
-  app,
-  user,
-  button_trigger_id,
-  dialog_token,
-  summary,
-  knowledgetype,
-  documentationLocation,
-  projectKey,
-  jiraServer
-) {
+// Öffnet den Exportdialog wird für ein einzelnes Enscheidungswissenselement.
+async function openSingleItemDialog(app, user, button_trigger_id, dialog_token, summary, knowledgetype, documentationLocation, projectKey, jiraServer) {
   let dialog_elements = [];
   if (documentationLocation === "s") {
     dialog_elements.push({
@@ -80,16 +77,8 @@ async function openSingleItemDialog(
   });
 }
 
-async function openMultItemDialog(
-  app,
-  user,
-  button_trigger_id,
-  dialog_token,
-  elementsWithIssueLoc,
-  elementsWithCommentLoc,
-  projectKey,
-  jiraServer
-) {
+// Öffnet den Exportdialog wird für mehrere Enscheidungswissenselemente.
+async function openMultItemDialog(app, user, button_trigger_id, dialog_token, elementsWithIssueLoc, elementsWithCommentLoc, projectKey, jiraServer) {
   let dialog_elements = [];
   dialog_elements.push(
     {
@@ -145,7 +134,8 @@ async function openMultItemDialog(
     });
   }
 
-  await app.client.dialog.open({
+  await app.client.dialog.open(
+  {
     token: dialog_token,
     dialog: {
       callback_id: "exportdialog-73f4x0",
@@ -160,3 +150,4 @@ async function openMultItemDialog(
 
 module.exports.openMultItemDialog = openMultItemDialog;
 module.exports.openSingleItemDialog = openSingleItemDialog;
+module.exports.knowledgeTypeOptions = knowledgeTypeOptions;

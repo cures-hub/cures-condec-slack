@@ -1,4 +1,4 @@
-const post_bot_messages = require("./post-bot-messages");
+const post_bot_messages = require("./postBotMessages");
 
 const patt1 = /(?!:(?:decision|issue|pro|con|alternative):|\s)[^\s:]+(?: [^\s:]+)*\s*:(?:decision|issue|pro|con|alternative):/g;
 const patt2 = /.*:(decision|issue|pro|con|alternative):/;
