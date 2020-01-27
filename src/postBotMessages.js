@@ -10,7 +10,7 @@ async function askForJiraExportSingleElement(
   let doc_loc_default_text = "Jira-Kommentar";
   if (docLoc === "i") {
     doc_loc_default_text = "Jira-Issue";
-  }
+    }
 
   const result = await app.client.chat.postMessage({
     token: botToken,
@@ -834,17 +834,18 @@ async function sendErrorToUser(app, context, channel, user, knowledgeElement) {
 
 
 async function sendChangedDesicionKnowledgeToChannel(  app, user, botToken, channel, knowledgetype, summary, jiraIssueURL){
-	
+
 	const result = await app.client.chat.postMessage({
     token: botToken,
     channel: channel,
     user: user,
     blocks:[
+      {
         type: "section",
         text: {
           type: "mrkdwn",
           text: `Dieses _Enscheidungswissen_  wurde im Jira aktualisiert: \n
-				• *Typ* :${knowledgetype}: (${knowledgetype}) \n 
+				• *Typ* :${knowledgetype}: (${knowledgetype}) \n
 				• *Titel* : "${summary}" \n`
         }
       },
