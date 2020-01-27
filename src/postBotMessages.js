@@ -861,8 +861,9 @@ async function sendChangedDesicionKnowledgeToChannel(  app, user, botToken, chan
 					"url": "${jiraIssueURL}"
 				}
 			]
-		}
+	  	}
     ]
+  }
 }
 
 module.exports.askForJiraExportSingleElement = askForJiraExportSingleElement;

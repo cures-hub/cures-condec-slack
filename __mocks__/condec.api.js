@@ -5,15 +5,17 @@
  *
 */
 //TODO umbenennn
-async function sendCreateIssueRequest(projectKey, summary, type, description, documentationLocation, username, password, host, issueKeyofExistingElement) {
+async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation, username, password, host, jiraIssueKey) {
+  if (projectKey == null || type == null || username == null || password == null || host == null) {
+    return Promise.resolve();
+  }
   return Promise.resolve({
 	  url: "mock.jiraRequest.createIssue",
 	  issueID: 999
   });
 }
 
-//TODO umbenennn
-async function sendGetIssueRequest(projectKey, id, documentationLocation, username, password, host)
+async function getDecisionKnowledgeElement(projectKey, id, documentationLocation, username, password, host)
 {
 	return Promise.resolve(
 	{
@@ -23,6 +25,6 @@ async function sendGetIssueRequest(projectKey, id, documentationLocation, userna
 	});
 }
 
-//TODO umbenennn 
+//TODO umbenennn
 export.sendGetIssueRequest = sendGetIssueRequest;
 export.sendCreateIssueRequest = sendCreateIssueRequest;
