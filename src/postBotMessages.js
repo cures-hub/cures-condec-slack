@@ -863,7 +863,8 @@ async function sendChangedDesicionKnowledgeToChannel(  app, user, botToken, chan
 			]
 	  	}
     ]
-  }
+  });
+  return result;
 }
 
 module.exports.askForJiraExportSingleElement = askForJiraExportSingleElement;
