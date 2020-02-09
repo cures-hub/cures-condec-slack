@@ -4,25 +4,34 @@
  * getestet werden können ohne tatsächlich anfragen an Jira zu schicken.
  *
 */
-//TODO umbenennn
 async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation, username, password, host, jiraIssueKey) {
+  const prom = new Promise((resolve, reject) => {
   if (projectKey == null || type == null || username == null || password == null || host == null) {
-    return Promise.resolve();
-  }
-  return Promise.resolve({
+    reject('Create request fail.' );
+  }else{
+    resolve({
 	  url: "mock.jiraRequest.createIssue",
 	  issueID: 999
-  });
+    });
+  }
+  })
+  return prom;
 }
 
 async function getDecisionKnowledgeElement(projectKey, id, documentationLocation, username, password, host)
 {
-	return Promise.resolve(
-	{
+  const prom = new Promise((resolve, reject) => {
+  if (projectKey == null || id == null || documentationLocation == null|| username == null || password == null || host == null) {
+    reject('GET request failed.');
+  }else{
+	resolve({
 	  jiraIssueURL :  'mock.jiraRequest.getIssue',
       summary : 'mock summary',
       knowledgeType : 'issue'
-	});
+	   });
+  }
+  })
+  return prom;
 }
 
 //TODO umbenennn
