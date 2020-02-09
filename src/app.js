@@ -2,7 +2,7 @@
 
 /*app.js
  *Dieses Modul ist der Kern der app. Hier wird die app gestartet,
- *initalisiert und Umgebungsvariablen geladen. 
+ *initalisiert und Umgebungsvariablen geladen.
  *Hier findet man auch die möglichen Events auf die die app reagiert.
  */
 
@@ -70,7 +70,7 @@ async function getChannelHistory(userToken, botToken, channel, count) {
 //Bot tritt channel bei, wenn ein neuer Channel in dem Workspace erstellt wurde.
 app.event("channel_created", async ({event, context}) => {
   const result = await app.client.channels.invite({
-    token: process.env.SLACK_USER_TOKEN, 
+    token: process.env.SLACK_USER_TOKEN,
     channel: event.channel.id,
     user: context.botUserId
   });
@@ -102,12 +102,12 @@ app.event("app_mention", async ({ event, context }) => {
     console.log(`matched greeting: ${greeting}`);
     console.log(`match 1.index: ${messageText.match(pattAppMentionGreetingEnglish)[0]}`);
     console.log(`match 2.index: ${messageText.match(pattAppMentionGreetingEnglish)[1]}`);
-	
+
     const result = await postBotMessages.greetUserEnglish(app, context.botToken, event.channel, event.user, greeting, botUserID);
     console.log(result);
 
     return result;
-	
+
   } else if (pattAppMentionGreetingGerman.test(messageText)) {
     if (messageText.match(pattAppMentionGreetingGerman)[0] === messageText.match(pattAppMentionGreetingGerman)[1]) {
       greeting = messageText;
@@ -117,15 +117,15 @@ app.event("app_mention", async ({ event, context }) => {
     console.log(`matched greeting: ${greeting}`);
     const result = await postBotMessages.greetUserGerman(app, context.botToken, event.channel, event.user, greeting, botUserID);
     return result;
-	
+
   } else if (/^(help|get help).*/i.test(messageText)) {
     const result = await postBotMessages.helpMessageEnglish(app, context.botToken, event.channel, event.user);
     return result;
-	
+
   } else if (/^(hilfe).*/i.test(messageText)) {
     const result = await postBotMessages.helpMessageGerman(app, context.botToken, event.channel, event.user);
     return result;
-	
+
   } else {
     const result = await postBotMessages.botMentionGeneralMessage(app, context.botToken, event.channel, event.user, botUserID);
     return result;
@@ -370,42 +370,27 @@ app.action("export-all-click", async ({ body, ack, context }) => {
 app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context, body }) => {
     try {
       ack();
+
       let keyOfExistingJiraIssue = 0;
       let userName = body.user.name;
-      elementsUpdateMessage = elementsWithIssueLoc.concat(
-        elementsWithCommentLoc
-      );
-      let numOfMultMessageElements =
-        elementsWithIssueLoc.length + elementsWithCommentLoc.length;
+      elementsUpdateMessage = elementsWithIssueLoc.concat(elementsWithCommentLoc);
+      let numOfMultMessageElements = elementsWithIssueLoc.length + elementsWithCommentLoc.length;
       let numOfElementsWithIssueLoc = elementsWithIssueLoc.length;
+
       projectKey = action.submission.project_key.trim();
       console.log(`Erhaltener Project-Key: ${projectKey}`);
       jiraServerURL = action.submission.jira_server.trim();
       console.log(`Erhaltener Server-URL: ${jiraServerURL}`);
+
       if (numOfElementsWithIssueLoc > 0) {
         await sendIssueRequests(
-          userName,
-          body.user.id,
-          elementsWithIssueLoc,
-          projectKey,
-          keyOfExistingJiraIssue,
-          action,
-          context,
-          body.channel.id
-        );
+          userName, body.user.id, elementsWithIssueLoc, projectKey,
+          keyOfExistingJiraIssue, action, context, body.channel.id);
 
         if (elementsWithCommentLoc.length > 0) {
           await sendCommentRequests(
-            userName,
-            body.user.id,
-            elementsWithCommentLoc,
-            elementsWithIssueLoc,
-            projectKey,
-            keyOfExistingJiraIssue,
-            action,
-            context,
-            body.channel.id
-          );
+            userName, body.user.id, elementsWithCommentLoc, elementsWithIssueLoc,
+            projectKey, keyOfExistingJiraIssue, action, context, body.channel.id);
         }
         if (numOfElementsWithIssueLoc > 1) {
           elementsWithIssueLoc.forEach((element, index) => {
@@ -424,14 +409,16 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
             }
           });
         }
-      } else {
+      }
+      else {
         for (const commentElement of elementsWithCommentLoc) {
           try {
             messageTS = commentElement.elementTS;
+            /* //no need anymore. fitted into function sendCommentRequests(...)
+            // (the prblem was to get the right issueKey for the issue in which the knowledgeElement should be sent.)
             description = `${commentElement.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
-            keyOfExistingJiraIssue = action.submission[
-              commentElement.elementID
-            ].trim();
+            keyOfExistingJiraIssue = action.submission[commentElement.elementID].trim();
+
             console.log(`Erhaltener Issue-Key: ${keyOfExistingJiraIssue}`);
 
             let jiraIssueData = await conDecAPI.createDecisionKnowledgeElement(
@@ -443,21 +430,14 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
               process.env.JIRA_USERNAME,
               process.env.JIRA_PASSWORD,
               jiraServerURL,
-              keyOfExistingJiraIssue              
+              keyOfExistingJiraIssue
             );
             jiraIssueURL = jiraIssueData.url;
             console.log(`Returned URL Comment: ${jiraIssueURL}`);
+
+            //SH elementArrays anpassen.
             if (typeof jiraIssueURL !== "undefined") {
-              allElements.forEach((knowledgeElement, index) => {
-                if (knowledgeElement.elementID === commentElement.elementID) {
-                  allElements.splice(index, 1);
-                }
-              });
-              elementsUpdateMessage.forEach((updateElement, index) => {
-                if (updateElement.elementID === commentElement.elementID) {
-                  elementsUpdateMessage.splice(index, 1);
-                }
-              });
+
               await postBotMessages.tellUserAboutSuccesfullUploadtoJira(
                 app,
                 body.user.name,
@@ -468,22 +448,9 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
                 commentElement.elementText,
                 jiraIssueURL
               );
-              elementsFromMultMessage.forEach((knowledgeElement, index1) => {
-                if (
-                  knowledgeElement[0].elementTS === commentElement.elementTS
-                ) {
-                  knowledgeElement.forEach((elementFromMessage, index2) => {
-                    if (
-                      commentElement.elementID === elementFromMessage.elementID
-                    ) {
-                      knowledgeElement.splice(index2, 1);
-                    }
-                  });
-                }
-                if (knowledgeElement.length === 0) {
-                  elementsFromMultMessage.splice(index1, 1);
-                }
-              });
+
+              removeSentElementFromArrrays(commentElement);
+
             } else {
               throw new UploadToJiraFailedException(
                 "URL is undefined",
@@ -501,7 +468,7 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
             );
             console.log(error.name + ":" + error.message);
           }
-        }
+        }*/
       }
 
       if (
@@ -540,7 +507,7 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
       );
       console.log(error.name + ":" + error.message);
     }
-  });
+});
 
 async function sendIssueRequests(
   userName,
@@ -549,7 +516,7 @@ async function sendIssueRequests(
   projectKey,
   issueKey,
   action,
-  context, 
+  context,
   channel
 ) {
   for (const element of elementList) {
@@ -558,7 +525,7 @@ async function sendIssueRequests(
       description = `${element.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
       console.log('Issue-Key for createDecisionKnowledgeElement:');
       console.log(issueKey);
-      
+
       let jiraIssueData = await conDecAPI.createDecisionKnowledgeElement(
         projectKey,
         element.elementText,
@@ -578,16 +545,8 @@ async function sendIssueRequests(
       if (typeof jiraIssueURL !== "undefined") {
         element.issueKey = `${jiraIssueURL}`.split("/").pop();
         console.log(`Element Issue-Key: ${element.issueKey}`);
-        allElements.forEach((knowledgeElement, index) => {
-          if (knowledgeElement.elementID === element.elementID) {
-            allElements.splice(index, 1);
-          }
-        });
-        elementsUpdateMessage.forEach((updateElement, index) => {
-          if (updateElement.elementID === element.elementID) {
-            elementsUpdateMessage.splice(index, 1);
-          }
-        });
+
+
         await postBotMessages.tellUserAboutSuccesfullUploadtoJira(
           app,
           userName,
@@ -598,20 +557,12 @@ async function sendIssueRequests(
           element.elementText,
           jiraIssueURL
         );
+        removeSentElementFromArrrays(element);
+
+
         console.log(`Anzahl Mult-Elemente: ${elementsFromMultMessage.length}`);
 
-        elementsFromMultMessage.forEach((knowledgeElement, index1) => {
-          if (knowledgeElement[0].elementTS === element.elementTS) {
-            knowledgeElement.forEach((elementFromMessage, index2) => {
-              if (element.elementID === elementFromMessage.elementID) {
-                knowledgeElement.splice(index2, 1);
-              }
-            });
-          }
-          if (knowledgeElement.length === 0) {
-            elementsFromMultMessage.splice(index1, 1);
-          }
-        });
+
       } else {
         throw new UploadToJiraFailedException("URL is undefined", element);
       }
@@ -638,89 +589,103 @@ async function sendCommentRequests(
   projectKey,
   issueKey,
   action,
-  context, 
+  context,
   channel
 ) {
   for (const commentElement of elementsWithCommentLoc) {
+
+    //getting the right issueKey to post knowledgeElement
     for (const issueElement of elementsWithIssueLoc) {
-      try {
-        if (
-          action.submission[commentElement.elementID] === issueElement.elementID
-        ) {
-          description = `${commentElement.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
+        if (action.submission[commentElement.elementID] === issueElement.elementID) {
           issueKey = issueElement.issueKey;
-
-          let jiraIssueData = await conDecAPI.createDecisionKnowledgeElement(
-            projectKey,
-            commentElement.elementText,
-            commentElement.elementType,
-            description,
-            commentElement.docLoc,
-            process.env.JIRA_USERNAME,
-            process.env.JIRA_PASSWORD,
-            jiraServerURL,
-            issueKey
-          );
-          jiraIssueURL = jiraIssueData.url;
-          console.log(`Returned URL Comment: ${jiraIssueURL}`);
-          if (typeof jiraIssueURL !== "undefined") {
-            allElements.forEach((knowledgeElement, index) => {
-              if (knowledgeElement.elementID === commentElement.elementID) {
-                allElements.splice(index, 1);
-              }
-            });
-            elementsUpdateMessage.forEach((updateElement, index) => {
-              if (updateElement.elementID === commentElement.elementID) {
-                elementsUpdateMessage.splice(index, 1);
-              }
-            });
-
-            await postBotMessages.tellUserAboutSuccesfullUploadtoJira(
-              app,
-              userName,
-              action.user,
-              context.botToken,
-              channel,
-              commentElement.elementType,
-              commentElement.elementText,
-              jiraIssueURL
-            );
-            elementsFromMultMessage.forEach((knowledgeElement, index1) => {
-              if (knowledgeElement[0].elementTS === commentElement.elementTS) {
-                knowledgeElement.forEach((elementFromMessage, index2) => {
-                  if (
-                    commentElement.elementID === elementFromMessage.elementID
-                  ) {
-                    knowledgeElement.splice(index2, 1);
-                  }
-                });
-              }
-              if (knowledgeElement.length === 0) {
-                elementsFromMultMessage.splice(index1, 1);
-              }
-            });
-          } else {
-            throw new UploadToJiraFailedException(
-              "URL is undefined",
-              commentElement
-            );
-          }
         }
-      } catch (error) {
-        console.error(error);
-        await postBotMessages.sendErrorToUser(
-          app,
-          context,
-          channel,
-          userID,
-          error.knowledgeElement
-        );
-        console.log(error.name + ":" + error.message);
-      }
     }
+    if(issueKey == 0){
+    issueKey = action.submission[commentElement.elementID].trim();
+    }
+
+    try {
+      description = `${commentElement.elementText} \n \n Dieses Entscheidungswissen wurde exportiert aus [Slack] von ${userName}.`;
+
+      let jiraIssueData = await conDecAPI.createDecisionKnowledgeElement(
+        projectKey,
+        commentElement.elementText,
+        commentElement.elementType,
+        description,
+        commentElement.docLoc,
+        process.env.JIRA_USERNAME,
+        process.env.JIRA_PASSWORD,
+        jiraServerURL,
+        issueKey
+    );
+      jiraIssueURL = jiraIssueData.url;
+      console.log(`Returned URL Comment: ${jiraIssueURL}`);
+      if (typeof jiraIssueURL !== "undefined") {
+      await postBotMessages.tellUserAboutSuccesfullUploadtoJira(
+        app,
+        userName,
+        action.user,
+        context.botToken,
+        channel,
+        commentElement.elementType,
+        commentElement.elementText,
+        jiraIssueURL
+      );
+      removeSentElementFromArrrays(commentElement);
+
+    } else {
+      throw new UploadToJiraFailedException(
+        "URL is undefined",
+        commentElement
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    await postBotMessages.sendErrorToUser(
+      app,
+      context,
+      channel,
+      userID,
+      error.knowledgeElement
+    );
+    console.log(error.name + ":" + error.message);
+  }
   }
 }
 
+// this function removes a knowledgeElement from view Arrays: 'allEmelents',
+// 'elementsUpdateMessage' and 'knowledgeElement' in 'elementsFromMultMessage'
+function removeSentElementFromArrrays(removeElement){
+
+  allElements.forEach((knowledgeElement, index) => {
+    if (knowledgeElement.elementID === removeElement.elementID) {
+      allElements.splice(index, 1);
+    }
+  });
+  elementsUpdateMessage.forEach((updateElement, index) => {
+    if (updateElement.elementID === removeElement.elementID) {
+      elementsUpdateMessage.splice(index, 1);
+    }
+  });
+
+  elementsFromMultMessage.forEach((knowledgeElement, index1) => {
+    if (
+      knowledgeElement[0].elementTS === removeElement.elementTS
+    ) {
+      knowledgeElement.forEach((elementFromMessage, index2) => {
+        if (
+          removeElement.elementID === elementFromMessage.elementID
+        ) {
+          knowledgeElement.splice(index2, 1);
+        }
+      });
+    }
+    if (knowledgeElement.length === 0) {
+      elementsFromMultMessage.splice(index1, 1);
+    }
+  });
+
+}
 function UploadToJiraFailedException(message, knowledgeElement) {
   this.message = message;
   this.knowledgeElement = knowledgeElement;

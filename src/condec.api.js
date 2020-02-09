@@ -2,12 +2,12 @@
  This module implements the communication with the ConDec REST API and the JIRA API.
  REST-calls to Jira are created.
  Knowledge elements documented in Jira can be accessed, created, and linked.
- Newly created decision knowledge elements can either be documented as separate Jira issues (documentation location "i") 
+ Newly created decision knowledge elements can either be documented as separate Jira issues (documentation location "i")
  or in the description/a comment of an existing Jira issue (documentation location "s").
 
  Requires
  * request-promise node module
-    
+
  Is required by
  * app.js
  */
@@ -18,10 +18,12 @@ const requestPromise = require("request-promise");
  * decision knowledge element can either be documented as a separate Jira issue
  * (documentation location "i") or in the description/a comment of an existing
  * Jira issue (documentation location "s").
- * 
+ *
  * external references: app.js, buttonEventHandler.js
  */
-async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation, 
+
+ 
+async function createDecisionKnowledgeElement(projectKey, summary, type, description, documentationLocation,
 		username, password, host, jiraIssueKey) {
   console.log("URL for request: ${host}");
   console.log("Jira issue key for request: ${jiraIssueKey}");
@@ -59,7 +61,7 @@ async function createDecisionKnowledgeElement(projectKey, summary, type, descrip
 
 /**
  * Retrieves an existing decision knowledge element from Jira.
- * 
+ *
  * external references: none
  */
 async function getDecisionKnowledgeElement(projectKey, id, documentationLocation, username, password, host) {
@@ -93,10 +95,10 @@ async function getDecisionKnowledgeElement(projectKey, id, documentationLocation
 
 /**
  * Creates a link between two knowledge elements.
- * 
+ *
  * external references: app.js
  */
-async function createLink(projectKey, knowledgeTypeOfChild, idOfParent, documentationLocationOfParent, idOfChild, 
+async function createLink(projectKey, knowledgeTypeOfChild, idOfParent, documentationLocationOfParent, idOfChild,
 		documentationLocationOfChild, username, password, host) {
   let options = {
     method: "POST",
