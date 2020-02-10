@@ -12,7 +12,7 @@ async function askForJiraExportSingleElement(
     doc_loc_default_text = "Jira-Issue";
   }
 
-  const result = await app.client.chat.postMessage({
+    const result = await app.client.chat.postMessage({
     token: botToken,
     channel: channel,
     user: user,
@@ -834,17 +834,18 @@ async function sendErrorToUser(app, context, channel, user, knowledgeElement) {
 
 
 async function sendChangedDesicionKnowledgeToChannel(  app, user, botToken, channel, knowledgetype, summary, jiraIssueURL){
-	
-	const result = await app.client.chat.postMessage({
+
+  const result = await app.client.chat.postMessage({
     token: botToken,
     channel: channel,
     user: user,
     blocks:[
+      {
         type: "section",
         text: {
           type: "mrkdwn",
           text: `Dieses _Enscheidungswissen_  wurde im Jira aktualisiert: \n
-				• *Typ* :${knowledgetype}: (${knowledgetype}) \n 
+				• *Typ* :${knowledgetype}: (${knowledgetype}) \n
 				• *Titel* : "${summary}" \n`
         }
       },
@@ -858,8 +859,8 @@ async function sendChangedDesicionKnowledgeToChannel(  app, user, botToken, chan
 						"text": "Get to Jira"
 					},
 					"url": "${jiraIssueURL}"
-				}
-			]
+				 }
+			  ]
 		}
     ]
 }
