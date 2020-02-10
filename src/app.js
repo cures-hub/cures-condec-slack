@@ -412,7 +412,7 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
       }
       else {
         for (const commentElement of elementsWithCommentLoc) {
-          try {
+          //try {
             messageTS = commentElement.elementTS;
             /* //no need anymore. fitted into function sendCommentRequests(...)
             // (the prblem was to get the right issueKey for the issue in which the knowledgeElement should be sent.)
@@ -467,8 +467,8 @@ app.action({ callback_id: "exportdialog-73f4x0" },async ({ ack, action, context,
               error.knowledgeElement
             );
             console.log(error.name + ":" + error.message);
-          }
-        }*/
+          }*/
+        }
       }
 
       if (
