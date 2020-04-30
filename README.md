@@ -67,3 +67,13 @@ Before you can use all functionality of CURES ConDec Slack, you need to add thes
 - :con:
 You can use the custom icons from images.
 You can add the app to any channel of your Slack workspace via the settings of that channel.
+
+### Set up an incoming webhook
+
+Jira-ConDec supports sending decision knowledge to Slack via webhook. Therefore you need to set up an incoming webhook,
+before you can create a new Channel in your workspace. In the setups for incoming webhook you select a Channel, in which the webhook posts his messages.
+
+1. go to https://api.slack.com/apps and choose your app
+2. on 'Incoming Webhooks' you can activate incoming Webhooks
+3. on 'Add New Webhook to Workspace' you can choose a channel for posts from the webhook.
+4. confirm and copy the now added Webhook URL. You paste this URL in Jira-ConDec to set up the webhook.
