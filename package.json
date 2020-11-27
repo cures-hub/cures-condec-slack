@@ -19,7 +19,7 @@
     "ajax": ">=0.0.4",
     "dotenv": "^8.1.0",
     "request": "^2.88.0",
-    "request-promise": "^4.2.4"
+    "request-promise": "^4.2.6"
   },
   "engines": {
     "node": ">= 10.0.0"
